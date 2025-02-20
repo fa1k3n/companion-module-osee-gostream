@@ -1,21 +1,23 @@
-//import { variables } from './variables'
-//import { feedbacks } from './feedbacks'
-//import { presets } from './presets'
+
 import { create } from './state'
 import { disconnectSocket, connect, sendCommand, sendCommands, GoStreamCmd } from './connection'
 import { ReqType } from './enums'
 import { GoStreamInstance } from './index'
 import {
-//	CompanionFeedbackDefinitions,
-//	CompanionPresetDefinitions,
-//	CompanionVariableDefinition,
 	TCPHelper,
 } from '@companion-module/base'
 
+type InputT = { input?: number }
+type FadeToBlackT = {
+	rate?: number
+	afv?: boolean
+	enable?: boolean
+}
+
 export type MixEffectStateT = {
-	pgm: number
-	pvw: number
-	ftbAFV: boolean
+	Program: InputT
+	Preview: InputT
+	FadeToBlack: FadeToBlackT
 }
 
 /*
@@ -44,9 +46,9 @@ class MixEffectBlock {
 	state: MixEffectStateT
 	constructor() {
 		this.state = {
-			pgm: 0,
-			pvw: 0,
-			ftbAFV: false
+			Program: { input: 0 },
+			Preview: { input: 0 },
+			FadeToBlack: { rate: 0, afv: false, enable: false },
 		} 
 
 		const cmds: GoStreamCmd[] = [
@@ -70,36 +72,34 @@ class MixEffectBlock {
 	handleCommand(data: GoStreamCmd) {
 		if (!data.value) return false
 		switch (data.id as string) {
-			case 'pgmIndex': 
-				this.state.pgm = data.value[0]
-				console.log("this.state.pgm", this.state.pgm)
+			case 'pgmIndex':
+				this.state.Program.input = data.value[0]
+				console.log("this.state.pgm", this.state.Program.input)
 				break
 			case 'pvwIndex':
-				this.state.pvw = data.value[0]
-				console.log("this.state.pvw", this.state.pvw)
+				this.state.Preview.input = data.value[0]
+				console.log("this.state.pvw", this.state.Preview.input)
 				break
 			case 'ftbAudioAFV':
-				this.state.ftbAFV = data.value[0] === 1 ? true : false
-				console.log("this.state.ftbAFV", this.state.ftbAFV)
+				this.state.FadeToBlack.afv = data.value[0] === 1 ? true : false
+				console.log("this.state.ftbAFV", this.state.FadeToBlack.afv)
 				break
 		}
 		return false
 	}
 
-	Program(input?: number): boolean | number {
-		if (arguments.length === 0) {
-			return this.state.pgm
-		}
-		sendCommand('pgmIndex', ReqType.Set, [input])
-		return true
+	set Program(para: InputT) {
+		sendCommand('pgmIndex', ReqType.Set, [para.input])
+	}
+	get Program(): InputT {
+		return this.state.Program
 	}
 
-	Preview(input?: number): boolean | number {
-		if (arguments.length === 0) {
-			return this.state.pvw
-		}
-		sendCommand('pvwIndex', ReqType.Set, [input])
-		return true
+	set Preview(para: InputT) {
+		sendCommand('pvwIndex', ReqType.Set, [para.input])
+	}
+	get Preview(): InputT {
+		return this.state.Preview
 	}
 
 	Cut() {
@@ -114,15 +114,13 @@ class MixEffectBlock {
 		sendCommand('ftb', ReqType.Set)
 	}
 
-	FadeToBlack(_rate?: number, afv?: boolean, _enable?: boolean): { rate: number, afv: boolean, enable: boolean } | boolean {
-		if (arguments.length === 0) {
-			return {
-				rate: 0, afv: this.state.ftbAFV, enable: false
-			}
-		}
+	set FadeToBlack(para: FadeToBlackT) {
 		// Just handle afv now
-		sendCommand('ftbAudioAFV', ReqType.Set, [afv ? 1 : 0])
-		return false
+		sendCommand('ftbAudioAFV', ReqType.Set, [para.afv ? 1 : 0])
+	}
+
+	get FadeToBlack(): FadeToBlackT {
+		return this.state.FadeToBlack
 	}
 }
 export class GoStream {

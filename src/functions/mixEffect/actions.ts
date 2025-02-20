@@ -25,8 +25,7 @@ export function create(model: GoStreamModel, state: MixEffectStateT, device: GoS
 				},
 			],
 			callback: async (action) => {
-				const id = getOptNumber(action, 'Source')
-				await device.mixEffectBlock.Program(id)
+				device.mixEffectBlock.Program = { input: getOptNumber(action, 'Source') }
 			},
 		},
 		[ActionId.PvwIndex]: {
@@ -41,8 +40,7 @@ export function create(model: GoStreamModel, state: MixEffectStateT, device: GoS
 				},
 			],
 			callback: async (action) => {
-				const id = getOptNumber(action, 'Source')
-				await device.mixEffectBlock.Preview(id)
+				device.mixEffectBlock.Preview = { input: getOptNumber(action, 'Source') }
 			},
 		},
 		[ActionId.CutTransition]: {
@@ -79,14 +77,10 @@ export function create(model: GoStreamModel, state: MixEffectStateT, device: GoS
 			],
 			callback: async (action) => {
 				const opt = getOptNumber(action, 'FtbAudioAFV')
-				let paramOpt = false
 				if (opt === 2) {
-					paramOpt = (<{ rate: number, afv: boolean, enable: boolean }>device.mixEffectBlock.FadeToBlack()).afv
-					await device.mixEffectBlock.FadeToBlack(1, !paramOpt, false)
-				//	await sendCommand(ActionId.FtbAudioAFV, ReqType.Set, [paramOpt])
+					device.mixEffectBlock.FadeToBlack = { afv: !device.mixEffectBlock.FadeToBlack.afv }
 				} else {
-					//	await sendCommand(ActionId.FtbAudioAFV, ReqType.Set, [opt])
-					await device.mixEffectBlock.FadeToBlack(1, opt ? false : true, false)
+					device.mixEffectBlock.FadeToBlack = { afv: opt ? false : true }
 				}
 			},
 		},

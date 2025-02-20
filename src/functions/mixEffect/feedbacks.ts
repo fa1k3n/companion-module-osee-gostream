@@ -31,7 +31,7 @@ export function create(model: GoStreamModel, state: MixEffectStateT, device: GoS
 				},
 			],
 			callback: (feedback) => {
-				return device.mixEffectBlock.Preview() === feedback.options.Source
+				return device.mixEffectBlock.Preview.input === feedback.options.Source
 			},
 		},
 		[FeedbackId.ProgramBG]: {
@@ -52,7 +52,7 @@ export function create(model: GoStreamModel, state: MixEffectStateT, device: GoS
 				},
 			],
 			callback: (feedback) => {
-				return device.mixEffectBlock.Program() === feedback.options.Source
+				return device.mixEffectBlock.Program.input === feedback.options.Source
 			},
 		},
 		[FeedbackId.KeysVisibility]: {
