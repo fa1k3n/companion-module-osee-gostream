@@ -5,12 +5,13 @@ import { FeedbackId } from './feedbackId'
 import { TransitionStyleChoice } from '../../model'
 import { GoStreamModel } from '../../models/types'
 import { MixEffectStateT } from './state'
+import { GoStream } from '../../GoStream'
 
 function createFeedbackName(name: string): string {
 	return 'MixEffect: ' + name
 }
 
-export function create(model: GoStreamModel, state: MixEffectStateT): CompanionFeedbackDefinitions {
+export function create(model: GoStreamModel, state: MixEffectStateT, device: GoStream): CompanionFeedbackDefinitions {
 	return {
 		[FeedbackId.PreviewBG]: {
 			type: 'boolean',
@@ -30,11 +31,7 @@ export function create(model: GoStreamModel, state: MixEffectStateT): CompanionF
 				},
 			],
 			callback: (feedback) => {
-				if (state.PvwSrc === feedback.options.Source) {
-					return true
-				} else {
-					return false
-				}
+				return device.mixEffectBlock.Preview() === feedback.options.Source
 			},
 		},
 		[FeedbackId.ProgramBG]: {
@@ -55,11 +52,7 @@ export function create(model: GoStreamModel, state: MixEffectStateT): CompanionF
 				},
 			],
 			callback: (feedback) => {
-				if (state.PgmSrc === feedback.options.Source) {
-					return true
-				} else {
-					return false
-				}
+				return device.mixEffectBlock.Program() === feedback.options.Source
 			},
 		},
 		[FeedbackId.KeysVisibility]: {

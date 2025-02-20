@@ -4,6 +4,9 @@ import { GoStream } from './GoStream'
 import { GetActionsList } from './actions'
 import { GoStreamDuet } from './models/duet'
 import { UpgradeScriptList } from './upgrades'
+import { variables } from './variables'
+import { feedbacks } from './feedbacks'
+import { presets } from './presets'
 
 //import { type IModelSpec } from './models/types'
 //import { GetModelSpec, GetAutoDetectModel } from './models'
@@ -19,7 +22,7 @@ export class GoStreamInstance extends InstanceBase<Config> {
 		this.updateStatus(InstanceStatus.Disconnected)
 		this.saveConfig(this.config)
 		this.gostream = new GoStream(this)
-		this.initConnection()
+		//this.initConnection()
 		this.init_variables()
 		this.init_actions()
 		this.init_feedbacks()
@@ -40,20 +43,16 @@ export class GoStreamInstance extends InstanceBase<Config> {
 		this.gostream.disconnectSocket()
 		this.updateStatus(InstanceStatus.Disconnected)
 		this.gostream = new GoStream(this)
-		this.initConnection()
 		this.init_variables()
 		this.init_actions()
 		this.init_feedbacks()
 		this.init_presets()
 		this.checkFeedbacks()
 	}
-	initConnection(): void {
-		this.log('debug', 'Initializing connection')
-		this.gostream.connect()
-	}
+	
 	init_variables(): void {
 		this.log('debug', 'Initializing variables')
-		this.setVariableDefinitions(this.gostream.getVariables(this))
+		this.setVariableDefinitions(variables(this)) // this.gostream.getVariables(this))
 	}
 	init_actions(): void {
 		this.log('debug', 'Initializing actions')
@@ -61,11 +60,13 @@ export class GoStreamInstance extends InstanceBase<Config> {
 	}
 	init_feedbacks(): void {
 		this.log('debug', 'Initializing feedbacks')
-		this.setFeedbackDefinitions(this.gostream.getFeedbacks(this))
+		//this.setFeedbackDefinitions(this.gostream.getFeedbacks(this))
+		this.setFeedbackDefinitions(feedbacks(this))
 	}
 	init_presets(): void {
 		this.log('debug', 'Initializing presets')
-		this.setPresetDefinitions(this.gostream.getPresets(this))
+		//this.setPresetDefinitions(this.gostream.getPresets(this))
+		this.setPresetDefinitions(presets(this))
 	}
 }
 

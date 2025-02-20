@@ -2,7 +2,7 @@ import { ActionId } from './actionId'
 import { getOptNumber } from './../../util'
 import { SwitchChoices } from './../../model'
 import { ReqType } from './../../enums'
-import { sendCommand } from './../../connection'
+import { sendCommand, DownstreamKey } from './../../connection'
 import { GoStreamModel } from '../../models/types'
 import type { CompanionActionDefinitions } from '@companion-module/base'
 import { DownstreamKeyerStateT } from './state'
@@ -31,10 +31,11 @@ export function create(model: GoStreamModel, state: DownstreamKeyerStateT): Comp
 				},
 			],
 			callback: async (action) => {
-				await sendCommand(ActionId.DskSourceFillKey, ReqType.Set, [
-					getOptNumber(action, 'DSKFill'),
-					getOptNumber(action, 'DSKKey'),
-				])
+				await DownstreamKey({ fillSource: getOptNumber(action, 'DSKFill'), keySource: getOptNumber(action, 'DSKKey') })
+				//await sendCommand(ActionId.DskSourceFillKey, ReqType.Set, [
+				//	getOptNumber(action, 'DSKFill'),
+				//	getOptNumber(action, 'DSKKey'),
+				//])
 			},
 		},
 		[ActionId.DskSourceFill]: {
@@ -49,7 +50,9 @@ export function create(model: GoStreamModel, state: DownstreamKeyerStateT): Comp
 				},
 			],
 			callback: async (action) => {
-				await sendCommand(ActionId.DskSourceFill, ReqType.Set, [getOptNumber(action, 'DSKFill')])
+				await DownstreamKey({ fillSource: getOptNumber(action, 'DSKFill') })
+
+				//await sendCommand(ActionId.DskSourceFill, ReqType.Set, [getOptNumber(action, 'DSKFill')])
 			},
 		},
 		[ActionId.DskSourceKey]: {
@@ -64,7 +67,9 @@ export function create(model: GoStreamModel, state: DownstreamKeyerStateT): Comp
 				},
 			],
 			callback: async (action) => {
-				await sendCommand(ActionId.DskSourceKey, ReqType.Set, [getOptNumber(action, 'DSKKey')])
+				await DownstreamKey({ keySource: getOptNumber(action, 'DSKKey') })
+
+				//await sendCommand(ActionId.DskSourceKey, ReqType.Set, [getOptNumber(action, 'DSKKey')])
 			},
 		},
 		[ActionId.DskMaskEnable]: {

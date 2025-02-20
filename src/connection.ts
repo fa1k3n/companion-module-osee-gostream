@@ -6,7 +6,7 @@ import { GoStreamInstance } from './index'
 import { updateVariables } from './variables'
 import type { GoStreamModel } from './models/types'
 
-import { MixEffectState } from './functions/mixEffect'
+//import { MixEffectState } from './functions/mixEffect'
 import { PlaybackState } from './functions/playback'
 import { RecordState } from './functions/record'
 import { StillGeneratorState } from './functions/stillGenerator'
@@ -171,8 +171,9 @@ function unpackData(msg_data: Buffer): GoStreamCmd {
 
 function handleCommands(instance: GoStreamInstance, data: GoStreamCmd[]): void {
 	let needReinit = false
+	instance.gostream.handleCommands(data)
 	data.forEach((json) => {
-		if (MixEffectState.update(instance.states.MixEffect, json)) needReinit = true
+		//if (MixEffectState.update(instance.states.MixEffect, json)) needReinit = true
 		if (PlaybackState.update(instance.states.Playback, json)) needReinit = true
 		if (RecordState.update(instance.states.Record, json)) needReinit = true
 		if (StillGeneratorState.update(instance.states.StillGenerator, json)) needReinit = true
@@ -194,7 +195,7 @@ function handleCommands(instance: GoStreamInstance, data: GoStreamCmd[]): void {
 
 export async function ReqStateData(model?: GoStreamModel): Promise<boolean> {
 	if (!model) return false
-	await MixEffectState.sync(model)
+	//await MixEffectState.sync(model)
 	await PlaybackState.sync(model)
 	await RecordState.sync(model)
 	await StillGeneratorState.sync(model)
@@ -212,6 +213,46 @@ export function disconnectSocket(): void {
 	if (tcp !== null) {
 		tcp.destroy()
 	}
+}
+
+//DownstreamKey index = "0" onAir = "false" fillSource = "1" keySource = "5" maskEnable = "false" maskHStart = "0" maskVStart = "0" maskHEnd = "100" maskVEnd = "100" shapedKey = "false" clip = "17" gain = "47" invert = "false" rate = "0.5"
+
+/*
+interface DownstreamKeyI {
+	index?: number
+	onAir?: boolean
+	fillSource?: number
+	keySource?: number
+	maskEnable?: number
+	maskHStart?: number
+	maskVStart?: number
+	maskHEnd?: number
+	maskVEnd?: number
+	shapedKey?: boolean
+	clip?: number
+	gain?: number
+	invert?: boolean
+	rate?: number
+}
+*/
+
+export async function DownstreamKey(params: { fillSource?, keySource? }): Promise<boolean> {
+	const commands: GoStreamCmd[] = []
+	if (params.fillSource && params.keySource) {
+		commands.push({
+			id: 'dskSourceFillKey', type: ReqType.Set, value: [params.fillSource, params.keySource]
+		});
+	} else if (params.fillSource && !params.keySource) {
+		commands.push({
+			id: 'dskSourceFill', type: ReqType.Set, value: [params.fillSource]
+		});
+	} else if (!params.fillSource && params.keySource) {
+		commands.push({
+			id: 'dskSourceKey', type: ReqType.Set, value: [params.keySource]
+		});
+	}
+
+	return sendCommands(commands);
 }
 
 export async function sendCommands(commands: GoStreamCmd[]): Promise<boolean> {

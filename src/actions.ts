@@ -16,7 +16,7 @@ import type { CompanionActionDefinitions } from '@companion-module/base'
 
 export function GetActionsList(instance: GoStreamInstance): CompanionActionDefinitions {
 	return {
-		...MixEffectActions.create(instance.model, instance.states.MixEffect),
+		...MixEffectActions.create(instance.model, instance.states.MixEffect, instance.gostream),
 		...SuperSourceActions.create(instance.model, instance.states.SuperSource),
 		...StreamingActions.create(instance.model, instance.states.Streaming),
 		...RecordActions.create(instance.model, instance.states.Record),

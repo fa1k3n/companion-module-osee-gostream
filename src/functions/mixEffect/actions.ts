@@ -2,6 +2,7 @@ import { ActionId } from './actionId'
 import { getOptNumber, getOptString } from '../../util'
 import { ReqType, ActionType, TransitionStyle } from '../../enums'
 import { sendCommand, sendCommands } from '../../connection'
+import { GoStream } from '../../GoStream'
 import type { CompanionActionDefinitions } from '@companion-module/base'
 import { TransitionStyleChoice, WipeDirectionChoices, SwitchChoices } from '../../model'
 import { GoStreamModel } from '../../models/types'
@@ -10,7 +11,7 @@ import { MixEffectStateT } from './state'
 function createActionName(name: string): string {
 	return 'MixEffect: ' + name
 }
-export function create(model: GoStreamModel, state: MixEffectStateT): CompanionActionDefinitions {
+export function create(model: GoStreamModel, state: MixEffectStateT, device: GoStream): CompanionActionDefinitions {
 	return {
 		[ActionId.PgmIndex]: {
 			name: createActionName('Set PGM Source'),
@@ -25,7 +26,7 @@ export function create(model: GoStreamModel, state: MixEffectStateT): CompanionA
 			],
 			callback: async (action) => {
 				const id = getOptNumber(action, 'Source')
-				await sendCommand(ActionId.PgmIndex, ReqType.Set, [id])
+				await device.mixEffectBlock.Program(id)
 			},
 		},
 		[ActionId.PvwIndex]: {
@@ -41,28 +42,28 @@ export function create(model: GoStreamModel, state: MixEffectStateT): CompanionA
 			],
 			callback: async (action) => {
 				const id = getOptNumber(action, 'Source')
-				await sendCommand(ActionId.PvwIndex, ReqType.Set, [id])
+				await device.mixEffectBlock.Preview(id)
 			},
 		},
 		[ActionId.CutTransition]: {
 			name: createActionName('Perform CUT transition'),
 			options: [],
 			callback: async () => {
-				await sendCommand(ActionId.CutTransition, ReqType.Set)
+				await device.mixEffectBlock.Cut()
 			},
 		},
 		[ActionId.AutoTransition]: {
 			name: createActionName('Perform AUTO transition'),
 			options: [],
 			callback: async () => {
-				await sendCommand(ActionId.AutoTransition, ReqType.Set)
+				await device.mixEffectBlock.Auto()
 			},
 		},
 		[ActionId.FTB]: {
 			name: createActionName('Perform FTB Transition'),
 			options: [],
 			callback: async () => {
-				await sendCommand(ActionId.FTB, ReqType.Set)
+				await device.mixEffectBlock.FTB()
 			},
 		},
 		[ActionId.FtbAudioAFV]: {
@@ -78,16 +79,14 @@ export function create(model: GoStreamModel, state: MixEffectStateT): CompanionA
 			],
 			callback: async (action) => {
 				const opt = getOptNumber(action, 'FtbAudioAFV')
-				let paramOpt = 0
+				let paramOpt = false
 				if (opt === 2) {
-					if (state.fadeToBlack.AFV === true) {
-						paramOpt = 0
-					} else {
-						paramOpt = 1
-					}
-					await sendCommand(ActionId.FtbAudioAFV, ReqType.Set, [paramOpt])
+					paramOpt = (<{ rate: number, afv: boolean, enable: boolean }>device.mixEffectBlock.FadeToBlack()).afv
+					await device.mixEffectBlock.FadeToBlack(1, !paramOpt, false)
+				//	await sendCommand(ActionId.FtbAudioAFV, ReqType.Set, [paramOpt])
 				} else {
-					await sendCommand(ActionId.FtbAudioAFV, ReqType.Set, [opt])
+					//	await sendCommand(ActionId.FtbAudioAFV, ReqType.Set, [opt])
+					await device.mixEffectBlock.FadeToBlack(1, opt ? false : true, false)
 				}
 			},
 		},

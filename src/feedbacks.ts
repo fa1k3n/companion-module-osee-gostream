@@ -17,7 +17,7 @@ export function feedbacks(instance: GoStreamInstance): CompanionFeedbackDefiniti
 		...UpstreamKeyerFeedbacks.create(instance.model, instance.states.UpstreamKeyer),
 		...RecordFeedbacks.create(instance.model, instance.states.Record),
 		...SuperSourceFeedbacks.create(instance.model, instance.states.SuperSource),
-		...MixEffectFeedbacks.create(instance.model, instance.states.MixEffect),
+		...MixEffectFeedbacks.create(instance.model, instance.states.MixEffect, instance.gostream),
 		...StreamingFeedbacks.create(instance.model, instance.states.Streaming),
 		...StillGeneratorFeedbacks.create(instance.model, instance.states.StillGenerator),
 		...DownstreamKeyerFeedbacks.create(instance.model, instance.states.DownstreamKeyer),
